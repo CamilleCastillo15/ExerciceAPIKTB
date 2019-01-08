@@ -16,9 +16,7 @@ use FOS\RestBundle\View\View;
 use FOS\RestBundle\Controller\Annotations as FOSRest;
 use App\Entity\Article;
 /**
- * Brand controller.
- *
- * @Route("/api")
+ * Product controller.
  */
 class ProductController extends Controller
 {
@@ -30,29 +28,10 @@ class ProductController extends Controller
      */
     public function getProductsAction()
     {
-//        $entityManager = $this->getDoctrine()->getManager();
         
         $repository = $this->getDoctrine()->getRepository(Product::class);
-//        $repositoryBrand = $this->getDoctrine()->getRepository(Brand::class);
-        
-//        $brand_1 = $repositoryBrand->findOneBy(array('id'=>1));
-        $product = $repository->findOneBy(array('id'=>2));
-//        echo 'ici';
-//        echo $product;
-//        exit();
-//        
-//        $product_test = new Product();
-//        $product_test->setBrandId($brand_1);
-//        $product_test->setActive(1);
-//        $product_test->setName(1);
-//        
-//        $entityManager->persist($product_test);
-//        $entityManager->flush();
-        
-        // query for a single Product by its primary key (usually "id")
+
         $products = $repository->findall();
-//        var_dump($products); exit();
-//        return View::create($product, Response::HTTP_OK , []);
         
         $serializer = $this->container->get('jms_serializer');
         $json_data = $serializer->serialize($products, 'json'); 
@@ -60,21 +39,98 @@ class ProductController extends Controller
         $response->headers->set('Content-Type', 'application/json');
         return $response;
     }
-//    /**
-//     * Create Article.
-//     * @FOSRest\Post("/article")
-//     *
-//     * @return array
-//     */
-//    public function postArticleAction(Request $request)
-//    {
-//        $article = new Article();
-//        $article->setName($request->get('name'));
-//        $article->setDescription($request->get('description'));
-//        $em = $this->getDoctrine()->getManager();
-//        $em->persist($article);
-//        $em->flush();
-//        return View::create($article, Response::HTTP_CREATED , []);
-//        
-//    }
+    /**
+     * Créer produit
+     * @FOSRest\Post("/products")
+     * 
+     * @param Request $request
+     * @return array|Response
+     */
+    public function postProductAction(Request $request)
+    {
+        $product = new Product();
+        
+        $repositoryBrand = $this->getDoctrine()->getRepository(Brand::class);
+        $brand = $repositoryBrand->findOneById($request->get('brandId'));
+        
+        $product->setBrandId($brand)->setActive($request->get('active'))->setName($request->get('name'))
+                ->setUrl($request->get('url'))->setDescription($request->get('description'));
+        
+        $em->persist($article);
+        $em->flush();
+        
+        $serializer = $this->container->get('jms_serializer');
+        $response = new Response($serializer->serialize($product, 'json'));
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+        
+    }
+    
+    /**
+     * Supprimer un produit
+     * @FOSRest\Delete("/product/{id}")
+     * 
+     * @param Request $request
+     * @return array|Response
+     */
+    public function deleteProductAction($id, Request $request)
+    {
+        $repositoryProduct = $this->getDoctrine()->getRepository(Product::class);
+        $product = $repositoryProduct->findOneById($id);
+        
+        if (!$product) {
+            throw $this->createNotFoundException('Pas de produit trouvé !');
+        }
+
+        $em = $this->getDoctrine()->getEntityManager();
+        $em->remove($product);
+        $em->flush();
+
+        $serializer = $this->container->get('jms_serializer');
+        $json_data = $serializer->serialize($product, 'json'); 
+        $response = new Response($json_data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+        
+    }
+    
+    /**
+     * Modifier un produit
+     * @FOSRest\Put("/product/{id}")
+     * 
+     * @param Request $request
+     * @return array|Response
+     */
+    public function putProductAction($id, Request $request)
+    {
+        $repositoryProduct = $this->getDoctrine()->getRepository(Product::class);
+        $product = $repositoryProduct->findOneById($id);
+        
+        if (!$product) {
+            throw $this->createNotFoundException('Pas de produit trouvé !');
+        }
+        
+        if($request->get('brandId')){           
+            $repositoryBrand = $this->getDoctrine()->getRepository(Brand::class);
+            $brand = $repositoryBrand->findOneById($request->get('brandId'));
+            
+            $product->setBrandId($brand);
+        }
+        
+        if($request->get('active')) $product->setActive($request->get('active'));
+        if($request->get('name')) $product->setName($request->get('name'));
+        if($request->get('url')) $product->setUrl($request->get('url'));
+        if($request->get('description')) $product->setDescription($request->get('description'));
+        
+        $em = $this->getDoctrine()->getEntityManager();
+        $em->persist($product);
+        $em->flush();
+        
+        $serializer = $this->container->get('jms_serializer');
+        $json_data = $serializer->serialize($product, 'json'); 
+        $response = new Response($json_data);
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+        
+    }
 }

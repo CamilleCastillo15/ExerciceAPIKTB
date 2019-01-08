@@ -1,3 +1,8 @@
-index:
-    path: /
+products_list:
+    path:     /products
     controller: App\Controller\ProductController::getProductsAction
+    
+#products_post:
+#    path:     /products
+#    controller: App\Controller\ProductController::getProductsAction    
+
