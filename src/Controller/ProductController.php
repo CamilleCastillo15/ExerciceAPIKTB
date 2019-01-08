@@ -9,12 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use FOS\RestBundle\View\View;
 use FOS\RestBundle\Controller\Annotations as FOSRest;
-use App\Entity\Article;
+
 /**
  * Product controller.
  */
@@ -39,6 +35,7 @@ class ProductController extends Controller
         $response->headers->set('Content-Type', 'application/json');
         return $response;
     }
+    
     /**
      * Créer produit
      * @FOSRest\Post("/products")
@@ -56,6 +53,7 @@ class ProductController extends Controller
         $product->setBrandId($brand)->setActive($request->get('active'))->setName($request->get('name'))
                 ->setUrl($request->get('url'))->setDescription($request->get('description'));
         
+        $em = $this->getDoctrine()->getEntityManager();
         $em->persist($article);
         $em->flush();
         

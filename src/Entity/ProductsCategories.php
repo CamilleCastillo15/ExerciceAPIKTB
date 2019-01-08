@@ -17,7 +17,7 @@ class ProductsCategories
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\product", inversedBy="productsCategories")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Product", inversedBy="productsCategories")
      * @ORM\JoinColumn(nullable=false)
      */
     private $products_id;
@@ -38,7 +38,7 @@ class ProductsCategories
         return $this->products_id;
     }
 
-    public function setProductsId(?product $products_id): self
+    public function setProductsId(?Product $products_id): self
     {
         $this->products_id = $products_id;
 
