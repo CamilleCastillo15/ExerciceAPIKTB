@@ -24,7 +24,9 @@ class ProductController extends Controller
      */
     public function getProductsAction()
     {
-        
+                var_dump($this);
+                exit();
+                
         $repository = $this->getDoctrine()->getRepository(Product::class);
 
         $products = $repository->findall();
