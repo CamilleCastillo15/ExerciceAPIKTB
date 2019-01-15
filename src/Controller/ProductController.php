@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
-use App\Entity\Brand;
+use App\Service\APIService;
 
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,126 +10,96 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as FOSRest;
 
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 /**
  * Product controller.
  */
 class ProductController extends Controller
 {
+    
     /**
-     * Liste tous les Products.
-     * @FOSRest\Get("/products")
+     * Liste tous les Product.
+     * @FOSRest\Get("api/products")
      *
      * @return array
      */
-    public function getProductsAction()
+    public function getProductsAction(APIService $apiService)
     {
-                var_dump($this);
-                exit();
-                
-        $repository = $this->getDoctrine()->getRepository(Product::class);
 
-        $products = $repository->findall();
+        $res = $apiService->getAll('Product');
         
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($products, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        return $res;
     }
     
-    /**
-     * Créer produit
-     * @FOSRest\Post("/products")
+     /**
+     * Créer un Product
+     * @FOSRest\Post("api/products")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function postProductAction(Request $request)
+    public function postProductAction(APIService $apiService, Request $request)
     {
-        $product = new Product();
+        $params = $request->query->all();
+        $entityAttributes = array();
         
-        $repositoryBrand = $this->getDoctrine()->getRepository(Brand::class);
-        $brand = $repositoryBrand->findOneById($request->get('brandId'));
+        if(isset($params['brandId'])) array_push($entityAttributes, array('brandId' => $request->get('brandId')));
+        else { throw new HttpException(400, 'Vous devez spécifier le brandId du product !'); }
         
-        $product->setBrandId($brand)->setActive($request->get('active'))->setName($request->get('name'))
-                ->setUrl($request->get('url'))->setDescription($request->get('description'));
+        if(isset($params['active'])) $entityAttributes += [ "active" => $params['active'] ];
         
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($article);
-        $em->flush();
+        if(isset($params['name'])) $entityAttributes += [ "name" => $params['name'] ];
+        else { throw new HttpException(400, 'Vous devez spécifier le name du product !'); }
         
-        $serializer = $this->container->get('jms_serializer');
-        $response = new Response($serializer->serialize($product, 'json'));
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        if(isset($params['url'])) $entityAttributes += [ "url" => $params['url'] ];
+        
+        if(isset($params['description'])) $entityAttributes += [ "description" => $params['description'] ];
+        
+        
+        $res = $apiService->post('Product', $entityAttributes);
+        
+        return $res;
         
     }
     
     /**
-     * Supprimer un produit
-     * @FOSRest\Delete("/product/{id}")
+     * Supprimer un Product
+     * @FOSRest\Delete("api/product/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function deleteProductAction($id, Request $request)
+    public function deleteProductAction(APIService $apiService, $id, Request $request)
     {
-        $repositoryProduct = $this->getDoctrine()->getRepository(Product::class);
-        $product = $repositoryProduct->findOneById($id);
         
-        if (!$product) {
-            throw $this->createNotFoundException('Pas de produit trouvé !');
-        }
-
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->remove($product);
-        $em->flush();
-
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($product, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        $res = $apiService->delete('Product', $id);
+        
+        return $res;
         
     }
     
     /**
-     * Modifier un produit
-     * @FOSRest\Put("/product/{id}")
+     * Modifier un Product
+     * @FOSRest\Put("api/product/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function putProductAction($id, Request $request)
+    public function putProductAction(APIService $apiService, $id, Request $request)
     {
-        $repositoryProduct = $this->getDoctrine()->getRepository(Product::class);
-        $product = $repositoryProduct->findOneById($id);
+        $params = $request->query->all();
+        $entityAttributes = array();
+
+        if(isset($params['brandId'])) array_push($entityAttributes, array('brandId' => $request->get('brandId')));       
+        if(isset($params['active'])) $entityAttributes += [ "active" => $params['active'] ];        
+        if(isset($params['name'])) $entityAttributes += [ "name" => $params['name'] ];      
+        if(isset($params['url'])) $entityAttributes += [ "url" => $params['url'] ];      
+        if(isset($params['description'])) $entityAttributes += [ "description" => $params['description'] ];
         
-        if (!$product) {
-            throw $this->createNotFoundException('Pas de produit trouvé !');
-        }
+        $res = $apiService->put('Product', $id, $entityAttributes);
         
-        if($request->get('brandId')){           
-            $repositoryBrand = $this->getDoctrine()->getRepository(Brand::class);
-            $brand = $repositoryBrand->findOneById($request->get('brandId'));
-            
-            $product->setBrandId($brand);
-        }
-        
-        if($request->get('active')) $product->setActive($request->get('active'));
-        if($request->get('name')) $product->setName($request->get('name'));
-        if($request->get('url')) $product->setUrl($request->get('url'));
-        if($request->get('description')) $product->setDescription($request->get('description'));
-        
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($product);
-        $em->flush();
-        
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($product, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        return $res;
         
     }
 }

@@ -1,5 +1,10 @@
 <?php
 
+// Les Bundles nécessaires au bon fonctionnement de l'appli
+// Dont JWS pour la sérialisation,
+// FOSRest pour la gestion des types de requêtes HTTP et la génération de route
+// Ou JWT pour l'authentification par token
+
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle::class => ['all' => true],

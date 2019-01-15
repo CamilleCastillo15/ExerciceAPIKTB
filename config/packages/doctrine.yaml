@@ -6,6 +6,8 @@ parameters:
     env(DATABASE_URL): ''
 
 doctrine:
+#config de la base de données liée à l'application
+#Son url est précisée dans la fichier env
     dbal:
         # configure these for your database server
         driver: 'pdo_mysql'

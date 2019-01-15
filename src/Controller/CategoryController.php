@@ -2,9 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
-use App\Entity\Brand;
-use App\Entity\Category;
+use App\Service\APIService;
 
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,106 +11,73 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as FOSRest;
 
 class CategoryController extends Controller
-{
+{    
     /**
-     * Liste toutes les categories.
-     * @FOSRest\Get("/categories")
+     * Liste toutes les Categories.
+     * @FOSRest\Get("api/categories")
      *
      * @return array
      */
-    public function getCategoriesAction()
+    public function getCategoriesAction(APIService $apiService)
     {
-        
-        $repository = $this->getDoctrine()->getRepository(Category::class);
 
-        $categories = $repository->findall();
+        $res = $apiService->getAll('Category');
         
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($categories, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        return $res;
     }
     
      /**
-     * Créer category
-     * @FOSRest\Post("/categories")
+     * Créer une Category
+     * @FOSRest\Post("api/categories")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function postCategoryAction(Request $request)
+    public function postCategoryAction(APIService $apiService, Request $request)
     {
-        $category = new Category();
-
-        $category->setName($request->get('name'));
         
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($category);
-        $em->flush();
+        $entityAttributes = array(
+            "name" => $request->get('name')
+        );
         
-        $serializer = $this->container->get('jms_serializer');
-        $response = new Response($serializer->serialize($category, 'json'));
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        $res = $apiService->post('Category', $entityAttributes);
+        
+        return $res;
         
     }
     
     /**
-     * Supprimer une category
-     * @FOSRest\Delete("/category/{id}")
+     * Supprimer une Category
+     * @FOSRest\Delete("api/category/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function deleteCategoryAction($id, Request $request)
+    public function deleteCategoryAction(APIService $apiService, $id, Request $request)
     {
-        $repositoryCategory = $this->getDoctrine()->getRepository(Category::class);
-        $category = $repositoryCategory->findOneById($id);
         
-        if (!$category) {
-            throw $this->createNotFoundException('Pas de catégorie trouvée !');
-        }
-
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->remove($category);
-        $em->flush();
-
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($category, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        $res = $apiService->delete('Category', $id);
+        
+        return $res;
         
     }
     
     /**
-     * Modifier une category
-     * @FOSRest\Put("/category/{id}")
+     * Modifier une Category
+     * @FOSRest\Put("api/category/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function putCategoryAction($id, Request $request)
+    public function putCategoryAction(APIService $apiService, $id, Request $request)
     {
-        $repositoryCategory = $this->getDoctrine()->getRepository(Category::class);
-        $category = $repositoryCategory->findOneById($id);
+         $entityAttributes = array(
+            "name" => $request->get('name')
+        );
         
-        if (!$category) {
-            throw $this->createNotFoundException('Pas de catégorie trouvée !');
-        }
-
-        $category->setName($request->get('name'));
+        $res = $apiService->put('Category', $id, $entityAttributes);
         
-        $em = $this->getDoctrine()->getEntityManager();
-        $em->persist($category);
-        $em->flush();
-        
-        $serializer = $this->container->get('jms_serializer');
-        $json_data = $serializer->serialize($category, 'json'); 
-        $response = new Response($json_data);
-        $response->headers->set('Content-Type', 'application/json');
-        return $response;
+        return $res;
         
     }
 }

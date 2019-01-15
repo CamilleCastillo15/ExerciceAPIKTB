@@ -6,11 +6,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+//Classe de l'entité 'Product'
+//Qui correspond à la table 'Product' dans la base de données
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  */
 class Product
 {
+    // l'id sera automatiquement généré à chaque création d'instance
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -18,6 +22,8 @@ class Product
      */
     private $id;
 
+    // brand_id correspond à une clé étrangère qui pointe sur l'entité 'Brand'
+    // Elle ne peut être nulle
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Brand", inversedBy="products")
      * @ORM\JoinColumn(nullable=false)
@@ -54,6 +60,9 @@ class Product
         $this->productsCategories = new ArrayCollection();
     }
 
+    // Les fonctions 'get...' permettent de récupérer chaque attribut de la classe
+    // Les fonctions 'set...' permettent de les modifier
+    // Elles sont générées automatiquement quand un nouvel attribut est crée
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +128,12 @@ class Product
         return $this;
     }
 
+    // L'attribut 'productsCategories' étant une relation oneToMany
+    // Le générateur d'entité de Symfony permet de récupérer toutes les entités productsCategories
+    // Liées à un product sous forme de tableau
+    
+    // D'ajouter des productsCategories liées au product
+    // Ou d'en supprimer
     /**
      * @return Collection|ProductsCategories[]
      */

@@ -1,8 +1,18 @@
-products_list:
-    path:     /products
-    controller: App\Controller\ProductController::getProductsAction
-    
-#products_post:
-#    path:     /products
-#    controller: App\Controller\ProductController::getProductsAction    
+#Route qui permet d'enregistrer un utilisateur
+#Qui pourra obtenir un token
+register:
+    path: /register
+    controller: App\Controller\AuthController::register
+    methods: POST
 
+#préfixes des URs de l'api
+#qui sont protégées
+api:
+    path: /api
+    controller: App\Controller\AuthController::api
+
+#URL qui permet de créer un token
+#généré par jwt
+login_check:
+    path:     /login_check
+    methods:  [POST]

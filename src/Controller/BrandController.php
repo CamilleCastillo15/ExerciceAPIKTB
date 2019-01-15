@@ -18,8 +18,8 @@ class BrandController extends Controller
 {
     
     /**
-     * Liste toutes les brand.
-     * @FOSRest\Get("/brands")
+     * Liste toutes les Brands.
+     * @FOSRest\Get("api/brands")
      *
      * @return array
      */
@@ -32,13 +32,13 @@ class BrandController extends Controller
     }
     
      /**
-     * Créer Brand
-     * @FOSRest\Post("/brands")
+     * Créer une Brand
+     * @FOSRest\Post("api/brands")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function postBrandAction(Request $request)
+    public function postBrandAction(APIService $apiService, Request $request)
     {
         
         $entityAttributes = array(
@@ -52,13 +52,13 @@ class BrandController extends Controller
     }
     
     /**
-     * Supprimer une brand
-     * @FOSRest\Delete("/brand/{id}")
+     * Supprimer une Brand
+     * @FOSRest\Delete("api/brand/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function deleteBrandAction($id, Request $request)
+    public function deleteBrandAction(APIService $apiService, $id, Request $request)
     {
         
         $res = $apiService->delete('Brand', $id);
@@ -68,13 +68,13 @@ class BrandController extends Controller
     }
     
     /**
-     * Modifier une brand
-     * @FOSRest\Put("/brand/{id}")
+     * Modifier une Brand
+     * @FOSRest\Put("api/brand/{id}")
      * 
      * @param Request $request
      * @return array|Response
      */
-    public function putBrandAction($id, Request $request)
+    public function putBrandAction(APIService $apiService, $id, Request $request)
     {
          $entityAttributes = array(
             "name" => $request->get('name')
